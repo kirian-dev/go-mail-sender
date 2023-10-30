@@ -8,13 +8,16 @@ import (
 )
 
 type Config struct {
-	AppPort    string
-	PgHost     string
-	PgPort     string
-	PgUser     string
-	PgPassword string
-	PgDBName   string
-	JWTKey     string
+	AppPort        string
+	PgHost         string
+	PgPort         string
+	PgUser         string
+	PgPassword     string
+	PgDBName       string
+	JWTKey         string
+	UploadFolder   string
+	BufferSize     string
+	GoroutineCount string
 }
 
 func LoadConfig() (*Config, error) {
@@ -23,13 +26,16 @@ func LoadConfig() (*Config, error) {
 	}
 
 	cfg := &Config{
-		AppPort:    os.Getenv("APP_PORT"),
-		PgHost:     os.Getenv("PG_HOST"),
-		PgPort:     os.Getenv("PG_PORT"),
-		PgUser:     os.Getenv("PG_USER"),
-		PgPassword: os.Getenv("PG_PASSWORD"),
-		PgDBName:   os.Getenv("PG_DBNAME"),
-		JWTKey:     os.Getenv("JWT_KEY"),
+		AppPort:        os.Getenv("APP_PORT"),
+		PgHost:         os.Getenv("PG_HOST"),
+		PgPort:         os.Getenv("PG_PORT"),
+		PgUser:         os.Getenv("PG_USER"),
+		PgPassword:     os.Getenv("PG_PASSWORD"),
+		PgDBName:       os.Getenv("PG_DBNAME"),
+		JWTKey:         os.Getenv("JWT_KEY"),
+		UploadFolder:   os.Getenv("UPLOAD_FOLDER"),
+		BufferSize:     os.Getenv("BUFFER_SIZE"),
+		GoroutineCount: os.Getenv("GOROUTINE_COUNT"),
 	}
 
 	if err := validateConfig(cfg); err != nil {
@@ -51,6 +57,9 @@ func validateConfig(cfg *Config) error {
 		{cfg.PgPassword, "PG_PASSWORD"},
 		{cfg.PgDBName, "PG_DBNAME"},
 		{cfg.JWTKey, "JWT_KEY"},
+		{cfg.UploadFolder, "UPLOAD_FOLDER"},
+		{cfg.BufferSize, "BUFFER_SIZE"},
+		{cfg.GoroutineCount, "GOROUTINE_COUNT"},
 	}
 
 	for _, field := range requiredFields {

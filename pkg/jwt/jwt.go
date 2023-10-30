@@ -16,19 +16,18 @@ type CustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func GenerateAccessToken(email string, c *config.Config) (string, error) {
+func GenerateAccessToken(email string, userID uuid.UUID, c *config.Config) (string, error) {
 	accessSigningKey := []byte(c.JWTKey)
 	accessToken := jwt.New(jwt.SigningMethodHS256)
 	accessClaims := accessToken.Claims.(jwt.MapClaims)
 	accessClaims["authorized"] = true
 	accessClaims["email"] = email
+	accessClaims["id"] = userID
 	accessClaims["exp"] = time.Now().Add(time.Minute * 43200).Unix()
-
 	accessTokenString, err := accessToken.SignedString(accessSigningKey)
 	if err != nil {
 		return "", err
 	}
-
 	return accessTokenString, nil
 }
 
