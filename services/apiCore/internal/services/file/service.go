@@ -2,6 +2,7 @@ package file
 
 import (
 	"context"
+	"database/sql"
 	"encoding/csv"
 	"go-mail-sender/config"
 	"go-mail-sender/services/apiCore/internal/models"
@@ -179,6 +180,11 @@ func (s *FileService) openCSVFile(filePath string) (*csv.Reader, error) {
 }
 
 func (s *FileService) handleReadError(err error, newFile *models.File) {
+	if newFile == nil {
+		s.log.Errorf("Error reading line: %v", err)
+		return
+	}
+
 	s.log.Errorf("Error reading line: %v", err)
 	newFile.LoadingAccounts--
 	newFile.FailAccounts++
@@ -189,6 +195,11 @@ func (s *FileService) handleReadError(err error, newFile *models.File) {
 }
 
 func (s *FileService) processTask(line []string, newFile *models.File, userID uuid.UUID) {
+	if newFile == nil {
+		s.log.Errorf("Nil newFile encountered")
+		return
+	}
+
 	if !utils.ValidateLine(line) {
 		s.handleInvalidLine(line, newFile)
 		return
@@ -196,13 +207,15 @@ func (s *FileService) processTask(line []string, newFile *models.File, userID uu
 
 	accountEmail := line[2]
 
-	exists, err := s.subscriberRepository.FindByEmail(accountEmail)
+	exists, err := s.subscriberRepository.FindByEmail(accountEmail, userID)
 	if err != nil {
-		s.log.Errorf("Error finding subscriber: %v", err)
-		return
+		if err != sql.ErrNoRows {
+			s.log.Errorf("Error finding subscriber: %v", err)
+			return
+		}
 	}
 
-	if exists.UserID == userID {
+	if exists != nil {
 		s.handleAccountExists(accountEmail, newFile)
 		return
 	}

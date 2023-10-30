@@ -40,9 +40,9 @@ func (r *SubscriberRepository) Create(userID uuid.UUID, subscriber *models.Subsc
 	return nil
 }
 
-func (r *SubscriberRepository) FindByEmail(email string) (*models.Subscriber, error) {
+func (r *SubscriberRepository) FindByEmail(email string, userID uuid.UUID) (*models.Subscriber, error) {
 	var subscriber models.Subscriber
-	err := r.db.QueryRow(FindAccountByEmailSQL, email).Scan(&subscriber.ID, &subscriber.Email)
+	err := r.db.QueryRow(FindAccountByEmailSQL, email, userID).Scan(&subscriber.ID, &subscriber.Email)
 	if err != nil {
 		return nil, err
 	}

@@ -22,5 +22,5 @@ type FileRepository interface {
 type SubscriberRepository interface {
 	Create(userID uuid.UUID, subscriber *models.Subscriber) error
 	GetSubscriberCount() (int, error)
-	FindByEmail(email string) (*models.Subscriber, error)
+	FindByEmail(email string, userID uuid.UUID) (*models.Subscriber, error)
 }
