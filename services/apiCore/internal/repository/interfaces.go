@@ -18,9 +18,3 @@ type FileRepository interface {
 	FindFileByID(id, userID uuid.UUID) (*models.File, error)
 	GetFiles(ctx context.Context, userID uuid.UUID) ([]*models.File, error)
 }
-
-type SubscriberRepository interface {
-	Create(userID uuid.UUID, subscriber *models.Subscriber) error
-	GetSubscriberCount() (int, error)
-	FindByEmail(email string, userID uuid.UUID) (*models.Subscriber, error)
-}

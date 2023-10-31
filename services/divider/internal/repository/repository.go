@@ -1,8 +1,8 @@
-package subscriber
+package repository
 
 import (
 	"database/sql"
-	"go-mail-sender/services/apiCore/internal/models"
+	"go-mail-sender/services/divider/internal/models"
 	"time"
 
 	"github.com/google/uuid"
@@ -27,12 +27,9 @@ func (r *SubscriberRepository) GetSubscriberCount() (int, error) {
 	return count, nil
 }
 
-func (r *SubscriberRepository) Create(userID uuid.UUID, subscriber *models.Subscriber) error {
-	subscriber.ID = uuid.New()
-	subscriber.CreatedAt = time.Now().UTC()
+func (r *SubscriberRepository) Create(subscriberReq *models.SubscriberRequest) error {
+	_, err := r.db.Exec(CreateSubscriber, uuid.New(), subscriberReq.Email, subscriberReq.FirstName, subscriberReq.LastName, subscriberReq.UserID, time.Now().UTC())
 
-	_, err := r.db.Exec(CreateSubscriber,
-		subscriber.ID, subscriber.Email, subscriber.FirstName, subscriber.LastName, userID, subscriber.CreatedAt)
 	if err != nil {
 		return err
 	}

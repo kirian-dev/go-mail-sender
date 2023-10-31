@@ -7,8 +7,7 @@ CREATE TABLE subscribers (
     first_name VARCHAR(255),
     last_name VARCHAR(255),
     user_id UUID NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    created_at TIMESTAMP NOT NULL
 );
 
 -- +goose Down

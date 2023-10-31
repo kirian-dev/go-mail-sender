@@ -40,7 +40,7 @@ func (h *FileHandler) GetFiles(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"file": exists})
+	c.JSON(http.StatusOK, gin.H{"data": exists})
 }
 
 func (h *FileHandler) GetFileByID(c *gin.Context) {

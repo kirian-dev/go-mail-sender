@@ -7,13 +7,13 @@ services:
     postgres:
         image: postgres:15
         restart: always
-        container_name: api_postgres
+        container_name: divider_postgres
         ports:
-            - '5432:5432'
+            - '5433:5432'
         environment:
             - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=postgres
-            - POSTGRES_DB=api_core_db3
+            - POSTGRES_DB=divider_db
         volumes:
             - ./pgdata:/var/lib/postgres/data
         networks:

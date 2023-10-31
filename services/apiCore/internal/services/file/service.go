@@ -1,15 +1,19 @@
 package file
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/csv"
+	"encoding/json"
+	"fmt"
 	"go-mail-sender/config"
 	"go-mail-sender/services/apiCore/internal/models"
 	"go-mail-sender/services/apiCore/internal/repository"
 	"go-mail-sender/services/apiCore/internal/utils"
 	"io"
 	"mime/multipart"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -38,18 +42,16 @@ func (s *Semaphore) Release() {
 }
 
 type FileService struct {
-	fileRepository       repository.FileRepository
-	subscriberRepository repository.SubscriberRepository
-	log                  *logrus.Logger
-	cfg                  *config.Config
+	fileRepository repository.FileRepository
+	log            *logrus.Logger
+	cfg            *config.Config
 }
 
-func NewFileService(fileRepository repository.FileRepository, subscriberRepository repository.SubscriberRepository, log *logrus.Logger, cfg *config.Config) *FileService {
+func NewFileService(fileRepository repository.FileRepository, log *logrus.Logger, cfg *config.Config) *FileService {
 	return &FileService{
-		fileRepository:       fileRepository,
-		subscriberRepository: subscriberRepository,
-		log:                  log,
-		cfg:                  cfg,
+		fileRepository: fileRepository,
+		log:            log,
+		cfg:            cfg,
 	}
 }
 
@@ -207,19 +209,19 @@ func (s *FileService) processTask(line []string, newFile *models.File, userID uu
 
 	accountEmail := line[2]
 
-	exists, err := s.subscriberRepository.FindByEmail(accountEmail, userID)
+	exists, err := s.getAccountByEmail(accountEmail, userID)
 	if err != nil {
-		if err != sql.ErrNoRows {
-			s.log.Errorf("Error finding subscriber: %v", err)
+		if err == sql.ErrNoRows {
+			s.createAccount(line, accountEmail, newFile, userID)
 			return
 		}
+		s.log.Errorf("Error finding subscriber: %v", err)
+		return
 	}
-
 	if exists != nil {
 		s.handleAccountExists(accountEmail, newFile)
 		return
 	}
-
 	s.createAccount(line, accountEmail, newFile, userID)
 }
 
@@ -251,18 +253,54 @@ func (s *FileService) handleAccountExists(accountEmail string, newFile *models.F
 	}
 }
 
-func (s *FileService) createAccount(line []string, accountEmail string, newFile *models.File, userID uuid.UUID) {
-	s.log.Errorf("Account created: %s", accountEmail)
+func (s *FileService) getAccountByEmail(accountEmail string, userID uuid.UUID) (*models.Subscriber, error) {
+	url := fmt.Sprintf("%s:%s/api/v1/subscribers/%s?user_id=%s", s.cfg.AppDividerURL, s.cfg.AppDividerPort, accountEmail, userID)
 
+	client := &http.Client{}
+
+	resp, err := client.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var subscriber models.Subscriber
+	err = json.NewDecoder(resp.Body).Decode(&subscriber)
+	if err != nil {
+		return nil, err
+	}
+
+	return &subscriber, nil
+}
+
+func (s *FileService) createAccount(line []string, accountEmail string, newFile *models.File, userID uuid.UUID) {
 	subscriber := &models.Subscriber{
 		Email:     accountEmail,
 		FirstName: line[0],
 		LastName:  line[1],
+		UserID:    userID,
 	}
 
-	if err := s.subscriberRepository.Create(userID, subscriber); err != nil {
-		s.log.Errorf("Failed to create subscriber: %v", err)
+	data, err := json.Marshal(subscriber)
+	if err != nil {
+		s.log.Errorf("Failed to marshal subscriber data: %v", err)
+		return
 	}
+	url := fmt.Sprintf("%s:%s/api/v1/subscribers", s.cfg.AppDividerURL, s.cfg.AppDividerPort)
+	client := &http.Client{}
+	resp, err := client.Post(url, "application/json", bytes.NewBuffer(data))
+	if err != nil {
+		s.log.Errorf("Failed to send POST request to divider: %v", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusCreated {
+		s.log.Errorf("Failed to create subscriber in divider. Status code: %d", resp.StatusCode)
+		return
+	}
+
+	s.log.Infof("Account created in divider: %s", accountEmail)
 
 	newFile.SuccessAccounts++
 	newFile.LoadingAccounts--

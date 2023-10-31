@@ -11,7 +11,6 @@ import (
 
 	authRepo "go-mail-sender/services/apiCore/internal/repository/auth"
 	fileRepo "go-mail-sender/services/apiCore/internal/repository/file"
-	subscriberRepo "go-mail-sender/services/apiCore/internal/repository/subscriber"
 
 	"go-mail-sender/config"
 	"go-mail-sender/pkg/db"
@@ -55,11 +54,10 @@ func main() {
 	mw := middleware.NewMiddlewareManager(cfg, log)
 
 	aRepo := authRepo.NewAuthRepository(pgDB.DB)
-	sRepo := subscriberRepo.NewSubscriberRepository(pgDB.DB)
 	fRepo := fileRepo.NewFileRepository(pgDB.DB)
 
 	aServices := authServices.NewAuthService(aRepo)
-	fServices := fileServices.NewFileService(fRepo, sRepo, log, cfg)
+	fServices := fileServices.NewFileService(fRepo, log, cfg)
 	authHttp.SetupRoutes(apiV1, aServices, cfg, log)
 
 	fileHttp.SetupRoutes(apiV1, fServices, cfg, log, mw)
