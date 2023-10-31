@@ -13,7 +13,7 @@ services:
         environment:
             - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=postgres
-            - POSTGRES_DB=api_core_db3
+            - POSTGRES_DB=api_core_db
         volumes:
             - ./pgdata:/var/lib/postgres/data
         networks:

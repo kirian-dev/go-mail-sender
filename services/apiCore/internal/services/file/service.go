@@ -255,7 +255,6 @@ func (s *FileService) handleAccountExists(accountEmail string, newFile *models.F
 
 func (s *FileService) getAccountByEmail(accountEmail string, userID uuid.UUID) (*models.Subscriber, error) {
 	url := fmt.Sprintf("%s:%s/api/v1/subscribers/%s?user_id=%s", s.cfg.AppDividerURL, s.cfg.AppDividerPort, accountEmail, userID)
-
 	client := &http.Client{}
 
 	resp, err := client.Get(url)
@@ -263,6 +262,10 @@ func (s *FileService) getAccountByEmail(accountEmail string, userID uuid.UUID) (
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, nil
+	}
 
 	var subscriber models.Subscriber
 	err = json.NewDecoder(resp.Body).Decode(&subscriber)
@@ -274,7 +277,7 @@ func (s *FileService) getAccountByEmail(accountEmail string, userID uuid.UUID) (
 }
 
 func (s *FileService) createAccount(line []string, accountEmail string, newFile *models.File, userID uuid.UUID) {
-	subscriber := &models.Subscriber{
+	subscriber := &models.SubscriberRes{
 		Email:     accountEmail,
 		FirstName: line[0],
 		LastName:  line[1],

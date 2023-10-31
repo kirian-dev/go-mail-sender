@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"go-mail-sender/services/divider/internal/models"
 	"time"
 
@@ -41,6 +42,9 @@ func (r *SubscriberRepository) FindByEmail(email string, userID uuid.UUID) (*mod
 	var subscriber models.Subscriber
 	err := r.db.QueryRow(FindAccountByEmailSQL, email, userID).Scan(&subscriber.ID, &subscriber.Email)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("subscriber does not exists")
+		}
 		return nil, err
 	}
 	return &subscriber, nil
