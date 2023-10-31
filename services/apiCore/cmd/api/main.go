@@ -4,10 +4,12 @@ import (
 	"fmt"
 	authHttp "go-mail-sender/services/apiCore/internal/delivery/http/auth"
 	fileHttp "go-mail-sender/services/apiCore/internal/delivery/http/file"
+	newslettersHttp "go-mail-sender/services/apiCore/internal/delivery/http/newsletters"
 
 	"go-mail-sender/services/apiCore/internal/middleware"
 	authServices "go-mail-sender/services/apiCore/internal/services/auth"
 	fileServices "go-mail-sender/services/apiCore/internal/services/file"
+	newslettersServices "go-mail-sender/services/apiCore/internal/services/newsletters"
 
 	authRepo "go-mail-sender/services/apiCore/internal/repository/auth"
 	fileRepo "go-mail-sender/services/apiCore/internal/repository/file"
@@ -58,9 +60,11 @@ func main() {
 
 	aServices := authServices.NewAuthService(aRepo)
 	fServices := fileServices.NewFileService(fRepo, log, cfg)
-	authHttp.SetupRoutes(apiV1, aServices, cfg, log)
+	nServices := newslettersServices.NewNewslettersService(cfg, log)
 
+	authHttp.SetupRoutes(apiV1, aServices, cfg, log)
 	fileHttp.SetupRoutes(apiV1, fServices, cfg, log, mw)
+	newslettersHttp.SetupRoutes(apiV1, nServices, cfg, log, mw)
 
 	r.Run(":" + cfg.AppPort)
 }

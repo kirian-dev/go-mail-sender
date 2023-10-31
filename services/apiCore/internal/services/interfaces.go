@@ -18,3 +18,7 @@ type FileService interface {
 	GetFiles(ctx context.Context, useID uuid.UUID) ([]*models.File, error)
 	GetFileByID(id, userID uuid.UUID) (*models.File, error)
 }
+
+type NewslettersService interface {
+	CreateNewsletter(message string, userID uuid.UUID) (*models.Newsletter, error)
+}

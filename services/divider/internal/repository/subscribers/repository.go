@@ -1,4 +1,4 @@
-package repository
+package subscribers
 
 import (
 	"database/sql"
@@ -48,4 +48,39 @@ func (r *SubscriberRepository) FindByEmail(email string, userID uuid.UUID) (*mod
 		return nil, err
 	}
 	return &subscriber, nil
+}
+
+func (r *SubscriberRepository) GetSubscribersInBatches(batchSize int, userID uuid.UUID) ([]*models.Subscriber, error) {
+	var subscribers []*models.Subscriber
+	offset := 0
+	for {
+		rows, err := r.db.Query(GetSubscribers, userID, offset, batchSize)
+		if err != nil {
+			return nil, err
+		}
+
+		batch := make([]*models.Subscriber, 0)
+
+		for rows.Next() {
+			var subscriber models.Subscriber
+			err := rows.Scan(&subscriber.ID, &subscriber.Email, &subscriber.FirstName, &subscriber.LastName, &subscriber.UserID)
+			if err != nil {
+				return nil, err
+			}
+			batch = append(batch, &subscriber)
+		}
+
+		if len(batch) == 0 {
+			break
+		}
+
+		subscribers = append(subscribers, batch...)
+		offset += batchSize
+	}
+
+	if len(subscribers) == 0 {
+		return nil, errors.New("no subscribers found")
+	}
+
+	return subscribers, nil
 }

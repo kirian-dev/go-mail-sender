@@ -1,4 +1,4 @@
-package http
+package subscribers
 
 import (
 	"go-mail-sender/config"
@@ -12,12 +12,12 @@ import (
 )
 
 type SubscriberHandler struct {
-	subscriberService services.ISubscriberServices
+	subscriberService services.SubscriberServices
 	cfg               *config.Config
 	log               *logrus.Logger
 }
 
-func NewSubscriberHandler(subscriberService services.ISubscriberServices, cfg *config.Config,
+func NewSubscriberHandler(subscriberService services.SubscriberServices, cfg *config.Config,
 	log *logrus.Logger) *SubscriberHandler {
 	return &SubscriberHandler{subscriberService: subscriberService, cfg: cfg, log: log}
 }

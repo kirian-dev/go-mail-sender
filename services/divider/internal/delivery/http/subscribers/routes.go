@@ -1,4 +1,4 @@
-package http
+package subscribers
 
 import (
 	"go-mail-sender/config"
@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func SetupRoutes(r *gin.RouterGroup, subscribersService services.ISubscriberServices, cfg *config.Config, log *logrus.Logger) {
+func SetupRoutes(r *gin.RouterGroup, subscribersService services.SubscriberServices, cfg *config.Config, log *logrus.Logger) {
 	subscribersHandler := NewSubscriberHandler(subscribersService, cfg, log)
 
 	subscribersGroup := r.Group("/subscribers")

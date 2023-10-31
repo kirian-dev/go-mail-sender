@@ -16,6 +16,6 @@ func SetupRoutes(r *gin.RouterGroup, fileService services.FileService, cfg *conf
 	{
 		fileGroup.POST("", mw.AuthMiddleware(), fileHandler.CreateFile)
 		fileGroup.GET("", mw.AuthMiddleware(), fileHandler.GetFiles)
-		fileGroup.GET("/:fileIdd", mw.AuthMiddleware(), fileHandler.GetFileByID)
+		fileGroup.GET("/:fileId", mw.AuthMiddleware(), fileHandler.GetFileByID)
 	}
 }

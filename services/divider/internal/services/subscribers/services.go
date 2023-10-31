@@ -1,4 +1,4 @@
-package services
+package subscribers
 
 import (
 	"go-mail-sender/services/divider/internal/models"
@@ -8,10 +8,10 @@ import (
 )
 
 type SubscribersService struct {
-	subscriberRepository repository.ISubscriberRepository
+	subscriberRepository repository.SubscriberRepository
 }
 
-func NewSubscribersService(subscriberRepository repository.ISubscriberRepository) *SubscribersService {
+func NewSubscribersService(subscriberRepository repository.SubscriberRepository) *SubscribersService {
 	return &SubscribersService{
 		subscriberRepository: subscriberRepository,
 	}

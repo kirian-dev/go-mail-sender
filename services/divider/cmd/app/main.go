@@ -5,9 +5,14 @@ import (
 	"go-mail-sender/config"
 	"go-mail-sender/pkg/db"
 	"go-mail-sender/pkg/log"
-	subHttp "go-mail-sender/services/divider/internal/delivery/http"
-	"go-mail-sender/services/divider/internal/repository"
-	"go-mail-sender/services/divider/internal/services"
+	newHttp "go-mail-sender/services/divider/internal/delivery/http/newsletters"
+	subHttp "go-mail-sender/services/divider/internal/delivery/http/subscribers"
+	newRepo "go-mail-sender/services/divider/internal/repository/newsletters"
+	packRepo "go-mail-sender/services/divider/internal/repository/packets"
+
+	subRepo "go-mail-sender/services/divider/internal/repository/subscribers"
+	newServ "go-mail-sender/services/divider/internal/services/newsletters"
+	subServ "go-mail-sender/services/divider/internal/services/subscribers"
 
 	"github.com/gin-gonic/gin"
 )
@@ -44,10 +49,15 @@ func main() {
 		})
 	})
 
-	sRepo := repository.NewSubscriberRepository(pgDB.DB)
+	sRepo := subRepo.NewSubscriberRepository(pgDB.DB)
+	newRepo := newRepo.NewNewslettersRepository(pgDB.DB)
+	packRepo := packRepo.NewPacketsRepository(pgDB.DB)
 
-	subServices := services.NewSubscribersService(sRepo)
+	subServices := subServ.NewSubscribersService(sRepo)
+	newServices := newServ.NewNewslettersService(newRepo, packRepo, cfg, log)
+
 	subHttp.SetupRoutes(apiV1, subServices, cfg, log)
+	newHttp.SetupRoutes(apiV1, newServices, cfg, log)
 
 	r.Run(":" + cfg.AppDividerPort)
 }
