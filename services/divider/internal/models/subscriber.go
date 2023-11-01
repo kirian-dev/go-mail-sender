@@ -8,6 +8,7 @@ import (
 
 type Subscriber struct {
 	ID        uuid.UUID
+	PacketID  uuid.UUID
 	Email     string
 	FirstName string
 	LastName  string

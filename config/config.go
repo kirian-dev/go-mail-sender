@@ -25,6 +25,7 @@ type Config struct {
 	PgUserDivider     string
 	PgPasswordDivider string
 	PgDBNameDivider   string
+	AppMailSenderPort string
 }
 
 func LoadConfig() (*Config, error) {
@@ -50,6 +51,7 @@ func LoadConfig() (*Config, error) {
 		PgUserDivider:     os.Getenv("PG_USER_DIVIDER"),
 		PgPasswordDivider: os.Getenv("PG_PASSWORD_DIVIDER"),
 		PgDBNameDivider:   os.Getenv("PG_DBNAME_DIVIDER"),
+		AppMailSenderPort: os.Getenv("APP_MAIL_SENDER_PORT"),
 	}
 
 	if err := validateConfig(cfg); err != nil {
@@ -81,6 +83,7 @@ func validateConfig(cfg *Config) error {
 		{cfg.PgUserDivider, "PG_USER_DIVIDER"},
 		{cfg.PgPasswordDivider, "PG_PASSWORD_DIVIDER"},
 		{cfg.PgDBNameDivider, "PG_DBNAME_DIVIDER"},
+		{cfg.AppMailSenderPort, "APP_MAIL_SENDER_PORT"},
 	}
 
 	for _, field := range requiredFields {

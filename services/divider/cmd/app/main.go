@@ -14,6 +14,7 @@ import (
 	newServ "go-mail-sender/services/divider/internal/services/newsletters"
 	subServ "go-mail-sender/services/divider/internal/services/subscribers"
 
+	"github.com/IBM/sarama"
 	"github.com/gin-gonic/gin"
 )
 
@@ -39,7 +40,17 @@ func main() {
 	}
 
 	log.Info("DB connection is successful")
+	producerConfig := sarama.NewConfig()
+	producerConfig.Producer.RequiredAcks = sarama.WaitForLocal
+	producerConfig.Producer.Return.Successes = true
 
+	brokers := []string{"localhost:9092"}
+
+	producer, err := sarama.NewSyncProducer(brokers, producerConfig)
+	if err != nil {
+		log.Fatal("Error initializing Kafka producer:", err)
+	}
+	defer producer.Close()
 	r := gin.Default()
 	apiV1 := r.Group("/api/v1")
 
@@ -54,7 +65,7 @@ func main() {
 	packRepo := packRepo.NewPacketsRepository(pgDB.DB)
 
 	subServices := subServ.NewSubscribersService(sRepo)
-	newServices := newServ.NewNewslettersService(newRepo, packRepo, cfg, log)
+	newServices := newServ.NewNewslettersService(newRepo, packRepo, sRepo, producer, cfg, log)
 
 	subHttp.SetupRoutes(apiV1, subServices, cfg, log)
 	newHttp.SetupRoutes(apiV1, newServices, cfg, log)

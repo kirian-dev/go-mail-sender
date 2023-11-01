@@ -84,3 +84,21 @@ func (r *SubscriberRepository) GetSubscribersInBatches(batchSize int, userID uui
 
 	return subscribers, nil
 }
+
+func (r *SubscriberRepository) UpdatePacketID(subscriberID, packetID uuid.UUID) error {
+	_, err := r.db.Exec(UpdatePacketID, packetID, subscriberID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *SubscriberRepository) UpdatePacketIDForSubscribers(subscribers []*models.Subscriber, packetID uuid.UUID) error {
+	for _, subscriber := range subscribers {
+		err := r.UpdatePacketID(subscriber.ID, packetID)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}

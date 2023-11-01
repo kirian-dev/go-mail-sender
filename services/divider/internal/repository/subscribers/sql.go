@@ -5,4 +5,5 @@ const (
 	GetSubscriberCount    = "SELECT COUNT(*) FROM subscribers"
 	FindAccountByEmailSQL = "SELECT id, email FROM subscribers WHERE email = $1 AND user_id = $2"
 	GetSubscribers        = "SELECT id, email, first_name, last_name, user_id FROM subscribers WHERE user_id = $1 OFFSET $2 LIMIT $3"
+	UpdatePacketID        = "UPDATE subscribers SET packet_id=$1 WHERE id=$2"
 )

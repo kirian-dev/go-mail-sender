@@ -1,5 +1,5 @@
 package packets
 
 const (
-	CreatePacket = "INSERT INTO packets (id, created_at) VALUES ($1, $2)"
+	CreatePacket = "INSERT INTO packets (id, message, created_at) VALUES ($1, $2, $3)"
 )

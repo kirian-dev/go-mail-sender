@@ -18,12 +18,18 @@ func NewPacketsRepository(db *sql.DB) *PacketsRepository {
 	}
 }
 
-func (r *PacketsRepository) Create(subscribers []*models.Subscriber) error {
-	_, err := r.db.Exec(CreatePacket, uuid.New(), time.Now().UTC())
-
-	if err != nil {
-		return err
+func (r *PacketsRepository) Create(msg string) (*models.Packet, error) {
+	packet := &models.Packet{
+		ID:        uuid.New(),
+		Message:   msg,
+		CreatedAt: time.Now().UTC(),
 	}
 
-	return nil
+	_, err := r.db.Exec(CreatePacket, packet.ID, packet.Message, packet.CreatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return packet, nil
 }
